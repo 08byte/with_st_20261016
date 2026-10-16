@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>출처 찾기 메모리 게임</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#FCF0DA;--fg:#4C4541;--card:#4C4541;--src:#AEAC78;--srcb:#4C4541;--dsc:#F2C46A;--dscb:#4C4541;--ok:#FCF0DA;--btn:#4C4541;--btnfg:#FCF0DA}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2e2926;--fg:#FCF0DA;--card:#AEAC78;--src:#AEAC78;--srcb:#FCF0DA;--dsc:#F2C46A;--dscb:#FCF0DA;--ok:#FCF0DA;--btn:#F2C46A;--btnfg:#4C4541}}
+:root[data-theme="dark"]{--bg:#2e2926;--fg:#FCF0DA;--card:#AEAC78;--src:#AEAC78;--srcb:#FCF0DA;--dsc:#F2C46A;--dscb:#FCF0DA;--ok:#FCF0DA;--btn:#F2C46A;--btnfg:#4C4541}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;text-align:center}
+main{max-width:860px;margin:0 auto;padding:16px 12px 32px}
+h1{font-size:1.4rem;margin:8px 0}
+p.sub{margin:0 0 12px;font-size:.9rem;opacity:.8}
+.bar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;align-items:center;margin-bottom:12px;font-size:.95rem}
+button{background:var(--btn);color:var(--btnfg);border:0;border-radius:20px;padding:8px 16px;font:inherit;cursor:pointer}
+button.off{opacity:.45}
+.stat{background:rgba(127,127,127,.15);border-radius:20px;padding:6px 12px}
+#grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.c{perspective:600px;min-height:92px;cursor:pointer}
+.in{position:relative;width:100%;height:100%;min-height:92px;transition:transform .45s;transform-style:preserve-3d}
+.c.f .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:6px;box-sizing:border-box;line-height:1.35}
+.back{background:var(--card);color:var(--btnfg);font-size:1.6rem}
+.front{transform:rotateY(180deg);font-size:.78rem;border:2px solid;flex-direction:column;gap:4px;color:#4C4541}
+.lb{font-size:.66rem;font-weight:700;padding:1px 8px;border-radius:10px;background:var(--srcb);color:var(--btnfg)}
+.front.d .lb{background:var(--dscb)}
+.front.s{background:#F6F5DC;border-color:#AEAC78;font-weight:700;font-size:.92rem}
+.front.d{background:#FFEFC7;border-color:#F2C46A}
+.c.m .front{background:#AEAC78;border-color:#4C4541}
+.c.m{cursor:default}
+#sb{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.pl{padding:8px 14px;border-radius:14px;border:2px solid transparent;background:rgba(127,127,127,.15);font-weight:700;font-size:.92rem}
+.pl.on{border-color:var(--dscb);background:var(--dsc);color:#4C4541}
+.nm{width:6.5em;border:0;border-bottom:1px dashed currentColor;background:transparent;color:inherit;font:inherit;text-align:center;padding:0 2px;outline:none}
+#win{display:none;margin:16px auto;padding:16px;border-radius:14px;background:var(--dsc);color:#4C4541;border:2px solid var(--dscb);max-width:420px}
+#win.show{display:block}
+#jp{display:none;margin:0 auto 12px;max-width:520px;padding:12px;border-radius:14px;background:#FFEFC7;border:2px solid #F2C46A;color:#4C4541}
+#jp.show{display:block}
+.jq{font-weight:700;margin-bottom:8px}
+.jx{font-size:.85rem;margin:4px 0}
+.jr{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+#jp button{background:#4C4541;color:#FCF0DA}
+@media(min-width:640px){#grid{grid-template-columns:repeat(6,1fr)}.front{font-size:.82rem}.c,.in{min-height:110px}}
+.legend{font-size:.8rem;margin-bottom:10px}
+.legend span{display:inline-block;padding:2px 8px;border-radius:8px;margin:0 4px;border:2px solid;color:#4C4541}
+</style>
+<script type="text/javascript" nonce="deb017a219984b589e2ca118f03" src="//local.adguard.org?ts=1792126798391&amp;type=content-script&amp;dmn=51eda02a-3557-48c3-a668-61c0e0c062fb.frame.claudeusercontent.com&amp;url=https%3A%2F%2F51eda02a-3557-48c3-a668-61c0e0c062fb.frame.claudeusercontent.com%2F_f%2F1792126118-100b%2F_src%2Findex.html%3F__frame_t%3DKwcxXb4duKsuAjIcvsbfCuJ5.fde32fa7-19d4-456b-8695-cee907eda4b1.a8013f69-b6d3-438f-8966-018049b06197.1792131083&amp;app=chrome.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1"></script><script type="text/javascript" nonce="deb017a219984b589e2ca118f03" src="//local.adguard.org?ts=1792126798391&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script></head>
+<body>
+<main>
+<h1>🔎 출처 찾기 메모리 게임</h1>
+<p class="sub">기관 이름 카드와 알맞은 자료 내용 카드를 짝지어 보세요! 두 장을 뒤집은 뒤 짝인지 직접 판단해 보세요. 점수판의 이름을 눌러 바꿀 수 있어요.</p>
+<div class="legend"><span style="background:#F6F5DC;border-color:#AEAC78">출처</span><span style="background:#FFEFC7;border-color:#F2C46A">자료 내용</span></div>
+<div class="bar">
+<button id="b6">쉬움 (6쌍)</button><button id="b12" class="off">어려움 (12쌍)</button>
+<span class="stat">시도 <b id="mv">0</b></span><span class="stat">시간 <b id="tm">0</b>초</span><span class="stat">최고 <b id="bs">-</b></span>
+<button id="pc">2명</button><button id="rs">다시 하기</button>
+</div>
+<div id="sb"></div>
+<div id="jp"></div>
+<div id="grid"></div>
+<div id="win"><div style="font-size:2rem">🎉</div><b id="wt"></b><br><br><button id="again">한 번 더!</button></div>
+</main>
+<script>
+const DATA=[
+["국립생태원","동물의 생김새와 사는 곳을 소개한 자료"],
+["질병관리청","손 씻기 6단계를 그림과 함께 알려 주는 자료"],
+["한국섬진흥원","우리나라 섬이 3,383개라고 알려 주는 2023년 자료"],
+["교육부","우리나라 유치원과 학교 수를 알려 주는 교육 기본 통계"],
+["국립수산과학원","바다 생물과 수산 정보를 소개한 자료"],
+["산림청","나무를 심고 가꾸는 방법을 알려 주는 자료"],
+["기상청","우리 지역의 기온과 비 소식을 알려 주는 날씨 예보"],
+["국립공원공단","국립공원의 자연환경과 탐방 정보를 알려 주는 자료"],
+["국립환경과학원","우리 지역의 대기질과 미세먼지 정보를 알려 주는 자료"],
+["한국저작권위원회","다른 사람이 만든 글과 그림을 사용할 때 출처를 밝히는 방법"],
+["국립중앙도서관","책의 제목과 글쓴이 등 책 정보를 찾을 수 있는 자료"],
+["한국관광공사","우리나라 여행지와 관광 정보를 소개한 자료"]];
+let names=[],players=2,cur=0,scores=[],pairs=6,open=[],lock=false,moves=0,matched=0,sec=0,timer=null,started=false,best={};
+try{best=JSON.parse(localStorage.getItem("memBest")||"{}")}catch(e){}
+const $=id=>document.getElementById(id);
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function showBest(){$("bs").textContent=best[pairs]?best[pairs]+"회":"-"}
+function start(){
+clearInterval(timer);started=false;open=[];lock=false;$("jp").className="";$("jp").innerHTML="";moves=0;matched=0;sec=0;
+scores=Array(players).fill(0);cur=0;renderSb();$("mv").textContent=0;$("tm").textContent=0;$("win").classList.remove("show");showBest();
+const picks=shuffle(DATA.map((d,i)=>i)).slice(0,pairs);
+const cards=[];picks.forEach(i=>{cards.push({id:i,t:DATA[i][0],k:"s"});cards.push({id:i,t:DATA[i][1],k:"d"})});
+shuffle(cards);
+const g=$("grid");g.innerHTML="";
+cards.forEach(c=>{
+const el=document.createElement("div");el.className="c";
+el.innerHTML='<div class="in"><div class="face back">❓</div><div class="face front '+c.k+'"></div></div>';
+const fr=el.querySelector(".front");const lb=document.createElement("span");lb.className="lb";lb.textContent=c.k==="s"?"출처":"자료 내용";const tx=document.createElement("span");tx.textContent=c.t;fr.append(lb,tx);
+el.onclick=()=>flip(el,c);g.appendChild(el)});
+}
+function flip(el,c){
+if(lock||el.classList.contains("f")||el.classList.contains("m"))return;
+if(!started){started=true;timer=setInterval(()=>{sec++;$("tm").textContent=sec},1000)}
+el.classList.add("f");open.push({el,c});
+if(open.length===2){
+moves++;$("mv").textContent=moves;lock=true;askJudge();
+}}
+function partner(c){return DATA[c.id][c.k==="s"?1:0]}
+function mkBtn(t,f){const b=document.createElement("button");b.textContent=t;b.onclick=f;return b}
+function mkDiv(cls,t){const d=document.createElement("div");d.className=cls;d.textContent=t;return d}
+function askJudge(){
+const jp=$("jp");jp.className="show";jp.innerHTML="";
+const r=document.createElement("div");r.className="jr";
+r.append(mkBtn("⭕ 짝이에요",()=>judge(true)),mkBtn("❌ 짝이 아니에요",()=>judge(false)));
+jp.append(mkDiv("jq",nm(cur)+", 이 두 카드는 짝일까요? 직접 판단해 보세요!"),r);
+jp.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function judge(g){
+const [a,b]=open;const truth=a.c.id===b.c.id&&a.c.k!==b.c.k;
+const jp=$("jp");jp.innerHTML="";
+let head;
+if(truth&&g){head="🎉 정답! 짝이 맞아요. +1점";a.el.classList.add("m");b.el.classList.add("m");matched++;scores[cur]++;renderSb()}
+else if(truth){head="😅 아쉬워요! 사실은 짝이에요. 점수는 없어요."}
+else if(g){head="😅 아쉬워요! 짝이 아니에요. 점수는 없어요."}
+else{head="👍 정답! 짝이 아니에요. (점수는 없어요)"}
+jp.append(mkDiv("jq",head));
+if(truth){jp.append(mkDiv("jx","「"+a.c.t+"」 ↔ 「"+b.c.t+"」"))}
+else{[a,b].forEach(o=>jp.append(mkDiv("jx","「"+o.c.t+"」의 짝: 「"+partner(o.c)+"」")))}
+const point=truth&&g;
+const r=document.createElement("div");r.className="jr";
+r.append(mkBtn("다음 ▶",()=>nextTurn(point,a,b)));jp.append(r);
+}
+function nextTurn(point,a,b){
+const jp=$("jp");jp.className="";jp.innerHTML="";
+open=[];lock=false;
+if(point){if(matched===pairs)win()}
+else{a.el.classList.remove("f");b.el.classList.remove("f");cur=(cur+1)%players;renderSb()}
+}
+function nm(i){return (names[i]&&names[i].trim())||"플레이어 "+(i+1)}
+function renderSb(){const sb=$("sb");sb.innerHTML="";scores.forEach((s,i)=>{const d=document.createElement("div");const on=i===cur&&matched<pairs;d.className="pl"+(on?" on":"");const mk=document.createElement("span");mk.textContent=on?"▶ ":"";const inp=document.createElement("input");inp.className="nm";inp.maxLength=8;inp.placeholder="플레이어 "+(i+1);inp.value=names[i]||"";inp.oninput=()=>{names[i]=inp.value};const sc=document.createElement("span");sc.textContent=" · "+s+"점";d.append(mk,inp,sc);sb.appendChild(d)})}
+function win(){
+clearInterval(timer);
+if(players===1&&(!best[pairs]||moves<best[pairs])){best[pairs]=moves;try{localStorage.setItem("memBest",JSON.stringify(best))}catch(e){}}
+showBest();
+const mx=Math.max(...scores);const w=scores.map((s,i)=>s===mx?i+1:0).filter(Boolean);
+$("wt").textContent=players===1?"모두 찾았어요! "+moves+"번 만에, "+sec+"초 걸렸어요.":(w.length>1?"공동 우승: "+w.map(n=>nm(n-1)).join(", "):nm(w[0]-1)+" 우승!")+" ("+mx+"쌍)";
+$("win").classList.add("show");$("win").scrollIntoView({behavior:"smooth",block:"center"});
+}
+function setLevel(n){pairs=n;$("b6").classList.toggle("off",n!==6);$("b12").classList.toggle("off",n!==12);start()}
+$("b6").onclick=()=>setLevel(6);$("b12").onclick=()=>setLevel(12);
+$("pc").onclick=()=>{players=players%4+1;$("pc").textContent=players+"명";start()};
+$("rs").onclick=start;$("again").onclick=start;
+start();
+</script>
+</body>
+</html>
